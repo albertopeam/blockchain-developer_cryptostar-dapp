@@ -11,12 +11,11 @@ contract StarNotary is ERC721 {
     struct Star {
         string name;
     }
-
-    // Implement Task 1 Add a name and symbol properties
-    // name: Is a short name to your token
-    // symbol: Is a short string like 'USD' -> 'American Dollar'
+    // nft name    
+    string public name = "Star Notary NFT";
+    // nft symbol
+    string public symbol = "SNT";
     
-
     // mapping the Star with the Owner Address
     mapping(uint256 => Star) public tokenIdToStarInfo;
     // mapping the TokenId and price
