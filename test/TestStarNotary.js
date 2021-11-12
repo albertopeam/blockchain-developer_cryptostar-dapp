@@ -1,4 +1,5 @@
 const StarNotary = artifacts.require("StarNotary");
+const truffleAssert = require('truffle-assertions');
 
 var accounts;
 var owner;
@@ -81,9 +82,40 @@ it('can add the star name and star symbol properly', async() => {
 });
 
 it('lets 2 users exchange stars', async() => {
-    // 1. create 2 Stars with different tokenId
-    // 2. Call the exchangeStars functions implemented in the Smart Contract
-    // 3. Verify that the owners changed
+    let instance = await StarNotary.deployed();
+    let user1 = accounts[1];
+    let user2 = accounts[2];
+    let starId1 = 6;
+    let starId2 = 7;
+    await instance.createStar('awesome star 1', starId1, {from: user1});
+    await instance.createStar('awesome star 2', starId2, {from: user2});
+
+    await instance.exchangeStars(starId1, starId2, {from: user1})
+
+    assert.equal(await instance.ownerOf(starId1), user2);
+    assert.equal(await instance.ownerOf(starId2), user1);
+});
+
+it('lets 2 users not exchange stars if sender is not owner of none of them', async() => {
+    let instance = await StarNotary.deployed();
+    let user1 = accounts[1];
+    let user2 = accounts[2];
+    let starId1 = 8;
+    let starId2 = 9;
+    await instance.createStar('awesome star 1', starId1, {from: user1});
+    await instance.createStar('awesome star 2', starId2, {from: user2});
+
+    await truffleAssert.reverts(instance.exchangeStars(starId1, starId2, {from: owner}), "You can't exchange the star you don't own");
+});
+
+it('lets 1 user not exchange its stars', async() => {
+    let instance = await StarNotary.deployed();
+    let starId1 = 10;
+    let starId2 = 11;
+    await instance.createStar('awesome star 1', starId1, {from: owner});
+    await instance.createStar('awesome star 2', starId2, {from: owner});
+
+    await truffleAssert.reverts(instance.exchangeStars(starId1, starId2, {from: owner}), "Sender is owner of both stars");
 });
 
 it('lets a user transfer a star', async() => {
@@ -94,7 +126,7 @@ it('lets a user transfer a star', async() => {
 
 it('lookUptokenIdToStarInfo test', async() => {
     let instance = await StarNotary.deployed();
-    let starId = 6;
+    let starId = 13;
     let starName = "new star";
     await instance.createStar(starName, starId, {from: owner});
 
