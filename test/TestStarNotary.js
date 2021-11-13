@@ -96,7 +96,7 @@ it('lets 2 users exchange stars', async() => {
     assert.equal(await instance.ownerOf(starId2), user1);
 });
 
-it('lets 2 users not exchange stars if sender is not owner of none of them', async() => {
+it('doesnt let 2 users exchange stars if sender is not owner of none of them', async() => {
     let instance = await StarNotary.deployed();
     let user1 = accounts[1];
     let user2 = accounts[2];
@@ -108,7 +108,7 @@ it('lets 2 users not exchange stars if sender is not owner of none of them', asy
     await truffleAssert.reverts(instance.exchangeStars(starId1, starId2, {from: owner}), "You can't exchange the star you don't own");
 });
 
-it('lets 1 user not exchange its stars', async() => {
+it('doesnt let 1 user exchange its stars', async() => {
     let instance = await StarNotary.deployed();
     let starId1 = 10;
     let starId2 = 11;
@@ -119,14 +119,29 @@ it('lets 1 user not exchange its stars', async() => {
 });
 
 it('lets a user transfer a star', async() => {
-    // 1. create a Star with different tokenId
-    // 2. use the transferStar function implemented in the Smart Contract
-    // 3. Verify the star owner changed.
+    let instance = await StarNotary.deployed();
+    let starId = 12;
+    let to = accounts[1];
+    let newOwner = accounts[3];
+    await instance.createStar('awesome star', starId, {from: newOwner});
+
+    await instance.transferStar(to, starId, {from: newOwner})
+
+    assert.equal(await instance.ownerOf(starId), to);
+    assert.equal(await instance.balanceOf(newOwner), 0);
+});
+
+it('doesnt let a user to transfer a star that is not owned', async() => {
+    let instance = await StarNotary.deployed();
+    let starId = 13;
+    await instance.createStar('awesome star', starId, {from: owner});
+
+    await truffleAssert.reverts(instance.transferStar(accounts[1], starId, {from: accounts[2]}), "Sender can't transfer a star that is not owned")
 });
 
 it('lookUptokenIdToStarInfo test', async() => {
     let instance = await StarNotary.deployed();
-    let starId = 13;
+    let starId = 14;
     let starName = "new star";
     await instance.createStar(starName, starId, {from: owner});
 

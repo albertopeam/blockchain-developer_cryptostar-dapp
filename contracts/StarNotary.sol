@@ -58,6 +58,7 @@ contract StarNotary is ERC721 {
         return tokenIdToStarInfo[_tokenId].name;
     }
 
+    // exchange two stars without ether tranfer
     function exchangeStars(uint256 _tokenId1, uint256 _tokenId2) public {
         address owner1 = ownerOf(_tokenId1);
         address owner2 = ownerOf(_tokenId2);
@@ -67,10 +68,11 @@ contract StarNotary is ERC721 {
         _transferFrom(owner2, owner1, _tokenId2);
     }
 
-    // Implement Task 1 Transfer Stars
+    // transfer sender star to another address
     function transferStar(address _to1, uint256 _tokenId) public {
-        //1. Check if the sender is the ownerOf(_tokenId)
-        //2. Use the transferFrom(from, to, tokenId); function to transfer the Star
+        address owner = ownerOf(_tokenId);
+        require(msg.sender == owner, "Sender can't transfer a star that is not owned");
+        transferFrom(owner, _to1, _tokenId);
     }
 
 }
